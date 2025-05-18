@@ -56,7 +56,7 @@ fn parse_input(problem_node: &tl::Node, parser: &tl::Parser) -> Vec<String> {
                         }
                         return "".to_string();
                     } else {
-                        return element.inner_text(parser).trim().to_string();
+                        return element.inner_text(parser).to_string();
                     }
                 })
                 .filter(|s| !s.is_empty())
