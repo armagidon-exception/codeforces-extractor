@@ -26,6 +26,17 @@ fn parse_input(problem_node: &tl::Node, parser: &tl::Parser) -> Vec<String> {
 
             // at this point, the node is an input node!
             let input = inner_node
+                .find_node(parser, &mut |inner_node: &tl::Node| {
+                    if let Some(tag) = inner_node.as_tag() {
+                        if tag.name() == "pre" {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .unwrap()
+                .get(parser)
+                .unwrap()
                 .children()
                 .unwrap()
                 .all(parser)
@@ -45,7 +56,7 @@ fn parse_input(problem_node: &tl::Node, parser: &tl::Parser) -> Vec<String> {
                         }
                         return "".to_string();
                     } else {
-                        return "".to_string();
+                        return element.inner_text(parser).trim().to_string();
                     }
                 })
                 .filter(|s| !s.is_empty())

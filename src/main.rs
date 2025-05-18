@@ -1,6 +1,7 @@
 mod parser;
 
 use std::fs;
+use regex::Regex;
 
 use clap::Parser;
 use reqwest;
@@ -8,16 +9,17 @@ use parser::{parse_content, Problem};
 
 #[derive(Debug, Parser)]
 struct Args {
-    /// Contest Name
-    contest_name: String,
+    /* /// Contest Name
+    contest_name: String, */
 
     /// Save Path
     #[arg(short, long)]
     save_path: std::path::PathBuf,
+    problem_id: String,
 }
 
 
-async fn get_content(contest_name: &str) -> String {
+/* async fn get_content(contest_name: &str) -> String {
     let client = reqwest::Client::new();
     let url = format!("https://codeforces.com/contest/{}/problems", contest_name);
     let res = client
@@ -27,11 +29,22 @@ async fn get_content(contest_name: &str) -> String {
         .await
         .unwrap();
     res.text().await.unwrap()
+} */
+
+async fn get_problem_content(problem_id: &str) -> String {
+    let client = reqwest::Client::new();
+    let re = Regex::new(r"^([0-9]+)([A-Z]+)$").unwrap();
+    assert!(re.is_match(problem_id));
+    let caps = re.captures(problem_id).unwrap();
+
+    let url = format!("https://codeforces.com/problemset/problem/{}/{}", &caps[1], &caps[2]);
+    let res = client.get(&url).header("User-Agent", "Mozilla/5.0").send().await.unwrap();
+    res.text().await.unwrap()
 }
 
 /// Save given `problem` to the given directory `save_path`
 fn save_problem(problem: &Problem, save_path: &std::path::Path) {
-    let problem_label = problem.name.split_once('.').unwrap().0;
+    let problem_label = problem.name.to_string();
     let problem_path = save_path.join(problem_label);
 
     fs::create_dir_all(&problem_path).unwrap();
@@ -50,15 +63,14 @@ fn save_problem(problem: &Problem, save_path: &std::path::Path) {
 async fn main() {
     let args = Args::parse();
 
-    let content = get_content(&args.contest_name).await;
+    // let content = get_content(&args.contest_name).await;
+    let content = get_problem_content(&args.problem_id).await;
     let problems: Vec<Problem> = parse_content(&content);
-
-    for problem in problems {
-        save_problem(&problem, &args.save_path);
-    }
+    
+    save_problem(&problems[0], &args.save_path);
 }
 
-#[tokio::test]
+/* #[tokio::test]
 async fn test_parser() {
     let content = get_content("1790").await;
     let problems: Vec<Problem> = parse_content(&content);
@@ -71,4 +83,4 @@ async fn test_parser() {
         "F. Timofey and Black-White Tree".to_string(),
         "G. Tokens on Graph".to_string(),
     ]);
-}
+} */
