@@ -1,4 +1,8 @@
-# codeforces-extractor
+# CrookForces Extractor
+This a shameless fork of the original codeforces extractor.
+I felt like a tool that would only be able to scrape entire contests instead of individual problem
+is annoying to work with. So I changed it.
+
 Blazingly fast codeforces problem extractor! *Rust btw!*
 
 > [!CAUTION]
@@ -7,13 +11,13 @@ Blazingly fast codeforces problem extractor! *Rust btw!*
 ## Installation 📦
 You can install this tool using:
 ```bash
-cargo install --git https://github.com/yunusey/codeforces-extractor
+cargo install --git https://github.com/armagidon-exception/crookforces-extractor
 ```
 
 ## Usage 📝
 Using this tool is pretty simple. The command takes two arguments:
 ```bash
-codeforces-extractor <contest_id> --save-path <path>
+crookforces <contest_id> --save-path <path>
 ```
 You need to provide both the arguments (they do not have default values).
 
