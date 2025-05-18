@@ -1,7 +1,8 @@
 mod parser;
 
-use std::fs;
+use std::{fs, path::Path};
 use regex::Regex;
+use xdg;
 
 use clap::Parser;
 use reqwest;
@@ -63,11 +64,23 @@ fn save_problem(problem: &Problem, save_path: &std::path::Path) {
 async fn main() {
     let args = Args::parse();
 
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("crookforce");
+    let template_dir = xdg_dirs.create_config_directory("template").expect("could not create configuration directory");
+
+
     // let content = get_content(&args.contest_name).await;
     let content = get_problem_content(&args.problem_id).await;
     let problems: Vec<Problem> = parse_content(&content);
-    
+
     save_problem(&problems[0], &args.save_path);
+
+    for p in fs::read_dir(template_dir).unwrap() {
+        let path = p.unwrap().path();
+        let fname = Path::new(path.file_name().unwrap());
+        let new_file = args.save_path.join(&problems[0].name).join(fname);
+        let _ = std::fs::copy(&path, &new_file);
+        println!("Copied {} to {}", path.display(), new_file.display())
+    }
 }
 
 /* #[tokio::test]
