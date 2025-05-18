@@ -25,22 +25,23 @@ fn parse_input(problem_node: &tl::Node, parser: &tl::Parser) -> Vec<String> {
             }
 
             // at this point, the node is an input node!
-            let input = inner_node
+            Some(inner_node
                 .find_node(parser, &mut |inner_node: &tl::Node| {
                     if let Some(tag) = inner_node.as_tag() {
                         if tag.name() == "pre" {
                             return true;
                         }
                     }
-                    return false;
+                    false
                 })
                 .unwrap()
                 .get(parser)
                 .unwrap()
                 .children()
                 .unwrap()
-                .all(parser)
+                .top()
                 .iter()
+                .map(|element|{ element.get(parser).unwrap() })
                 .map(|element| {
                     if let Some(tag) = element.as_tag() {
                         let attributes = tag.attributes();
@@ -51,19 +52,17 @@ fn parse_input(problem_node: &tl::Node, parser: &tl::Parser) -> Vec<String> {
                                 .starts_with(b"test-example-line")
                             {
                                 let inner_text = element.inner_text(parser);
-                                return format!("{}\n", inner_text.trim().to_string());
+                                return format!("{}\n", inner_text.trim());
                             }
                         }
-                        return "".to_string();
+                        "".to_string()
                     } else {
-                        return element.inner_text(parser).to_string();
+                        element.inner_text(parser).trim().to_string()
                     }
                 })
                 .filter(|s| !s.is_empty())
                 .collect::<Vec<String>>()
-                .join("");
-
-            return Some(input);
+                .join(""))
         })
         .filter(|s| s.is_some())
         .map(|s| s.unwrap())
